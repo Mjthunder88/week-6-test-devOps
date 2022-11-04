@@ -3,8 +3,21 @@ const path = require('path')
 const app = express()
 const {bots, playerRecord} = require('./data')
 const {shuffleArray} = require('./utils')
+require('dotenv').config()
 
 app.use(express.json())
+
+const {ROLLBAR_TOKEN} = process.env
+
+// include and initialize the rollbar library with your access token
+var Rollbar = require('rollbar')
+var rollbar = new Rollbar({
+  accessToken: ROLLBAR_TOKEN,
+  captureUncaught: true,
+  captureUnhandledRejections: true,
+})
+
+// rollbar.log('Hello world!')
 
 const {home, homeCss, homeJs} = require("./controller")
 
@@ -17,6 +30,7 @@ app.get('/api/robots', (req, res) => {
         res.status(200).send(botsArr)
     } catch (error) {
         console.log('ERROR GETTING BOTS', error)
+        rollbar.critical("Not grabbing all of the bots!")
         res.sendStatus(400)
     }
 })
@@ -29,6 +43,7 @@ app.get('/api/robots/five', (req, res) => {
         res.status(200).send({choices, compDuo})
     } catch (error) {
         console.log('ERROR GETTING FIVE BOTS', error)
+        rollbar.info("User started the game")
         res.sendStatus(400)
     }
 })
@@ -60,6 +75,7 @@ app.post('/api/duel', (req, res) => {
         }
     } catch (error) {
         console.log('ERROR DUELING', error)
+        rollbar.info("User battled")
         res.sendStatus(400)
     }
 })
@@ -69,6 +85,7 @@ app.get('/api/player', (req, res) => {
         res.status(200).send(playerRecord)
     } catch (error) {
         console.log('ERROR GETTING PLAYER STATS', error)
+        rollbar.error("Displays win or loss count wrong")
         res.sendStatus(400)
     }
 })
