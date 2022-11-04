@@ -7,7 +7,7 @@ require('dotenv').config()
 
 app.use(express.json())
 
-const {ROLLBAR_TOKEN} = process.env
+let {ROLLBAR_TOKEN} = process.env
 
 // include and initialize the rollbar library with your access token
 var Rollbar = require('rollbar')
@@ -37,19 +37,20 @@ app.get('/api/robots', (req, res) => {
 
 app.get('/api/robots/five', (req, res) => {
     try {
+        rollbar.info("User started the game")
         let shuffled = shuffleArray(bots)
         let choices = shuffled.slice(0, 5)
         let compDuo = shuffled.slice(6, 8)
         res.status(200).send({choices, compDuo})
     } catch (error) {
         console.log('ERROR GETTING FIVE BOTS', error)
-        rollbar.info("User started the game")
         res.sendStatus(400)
     }
 })
 
 app.post('/api/duel', (req, res) => {
     try {
+        rollbar.info("User battled")
         // getting the duos from the front end
         let {compDuo, playerDuo} = req.body
 
@@ -75,17 +76,16 @@ app.post('/api/duel', (req, res) => {
         }
     } catch (error) {
         console.log('ERROR DUELING', error)
-        rollbar.info("User battled")
         res.sendStatus(400)
     }
 })
 
 app.get('/api/player', (req, res) => {
     try {
+        rollbar.error("Displays win or loss count wrong")
         res.status(200).send(playerRecord)
     } catch (error) {
         console.log('ERROR GETTING PLAYER STATS', error)
-        rollbar.error("Displays win or loss count wrong")
         res.sendStatus(400)
     }
 })
